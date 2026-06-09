@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>薪資儀表板 2026年1–5月｜營運部門</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600&family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ink:#18181a;--ink2:#45454a;--ink3:#909098;
+  --rule:#e8e6e0;--rule2:#d0cdc5;
+  --bg:#f6f4ee;--surface:#fbfaf6;
+  --accent:#2d4a2d;
+  --up:#b83c1c;--down:#1a6640;
+  --serif:'Noto Serif TC',serif;
+  --sans:'Noto Sans TC',sans-serif;
+  --mono:'DM Mono',monospace;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;min-height:100vh;}
+.header{background:var(--accent);color:#fff;padding:2.5rem 3rem 2rem;position:relative;overflow:hidden;}
+.header::before{content:'';position:absolute;top:-60px;right:-80px;width:320px;height:320px;border-radius:50%;border:0.5px solid rgba(255,255,255,0.08);}
+.header-eyebrow{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;opacity:0.55;margin-bottom:0.5rem;font-weight:300;}
+.header-title{font-family:var(--serif);font-size:26px;font-weight:600;letter-spacing:-0.01em;line-height:1.2;}
+.header-sub{margin-top:0.35rem;font-size:12px;opacity:0.55;font-weight:300;}
+.header-kpis{margin-top:1.75rem;display:flex;gap:2.5rem;flex-wrap:wrap;}
+.header-kpi{font-size:12px;opacity:0.75;}
+.header-kpi strong{font-family:var(--mono);font-size:20px;font-weight:500;display:block;opacity:1;letter-spacing:-0.03em;margin-bottom:1px;}
+.header-kpi .diff{font-size:11px;opacity:0.7;margin-top:2px;}
+
+/* 月份選擇器 */
+.month-selector{background:var(--surface);border-bottom:1px solid var(--rule);padding:0.75rem 3rem;display:flex;gap:6px;overflow-x:auto;}
+.month-btn{background:none;border:1px solid var(--rule2);border-radius:20px;padding:4px 14px;font-family:var(--sans);font-size:12px;color:var(--ink3);cursor:pointer;white-space:nowrap;transition:all 0.12s;}
+.month-btn:hover{border-color:var(--accent);color:var(--accent);}
+.month-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500;}
+
+nav{background:var(--surface);border-bottom:1px solid var(--rule);padding:0 3rem;display:flex;position:sticky;top:0;z-index:100;overflow-x:auto;}
+.nav-btn{background:none;border:none;border-bottom:2px solid transparent;padding:0.75rem 1.2rem;font-family:var(--sans);font-size:13px;color:var(--ink3);cursor:pointer;white-space:nowrap;}
+.nav-btn:hover{color:var(--ink);}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500;}
+
+.main{max-width:960px;margin:0 auto;padding:2.5rem 3rem;}
+.section{display:none;}
+.section.active{display:block;}
+
+.chart-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1rem;}
+.chart-label{font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink3);}
+.chart-legend{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--ink3);}
+.ld{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:4px;vertical-align:middle;}
+.chart-wrap{position:relative;width:100%;height:280px;margin-bottom:2.5rem;}
+
+.analysis-header{font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:1rem;padding-bottom:0.6rem;border-bottom:1px solid var(--rule2);}
+.change-list{display:flex;flex-direction:column;}
+.change-item{display:grid;grid-template-columns:90px 1fr;border-bottom:1px solid var(--rule);}
+.change-item:last-child{border-bottom:none;}
+.change-month{padding:1rem 1rem 1rem 0;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:3px;}
+.change-month .m-from{font-size:11px;color:var(--ink3);}
+.change-month .m-to{font-size:13px;font-weight:500;color:var(--ink);}
+.change-month .m-delta{font-size:11px;font-family:var(--mono);margin-top:2px;}
+.change-month .du{color:var(--up);}
+.change-month .dd{color:var(--down);}
+.change-factors{padding:1rem 0 1rem 1.25rem;display:flex;flex-direction:column;gap:0.5rem;}
+.factor{display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--ink2);line-height:1.5;}
+.factor-tag{font-size:10px;font-weight:500;padding:1px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;}
+.tag-hc{background:#eef2fb;color:#2a4a8a;}
+.tag-ot{background:#fdf3e8;color:#7a4010;}
+.tag-noh{background:#f5eefb;color:#5a2a7a;}
+.tag-adj{background:#eaf0ea;color:#2d4a2d;}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th{font-size:10px;font-weight:500;color:var(--ink3);text-align:left;padding:0 8px 8px;border-bottom:0.5px solid var(--rule2);white-space:nowrap;}
+th.r{text-align:right;}
+td{padding:8px 8px;border-bottom:0.5px solid var(--rule);color:var(--ink);vertical-align:top;}
+td.r{text-align:right;font-size:12px;vertical-align:middle;}
+td.m{color:var(--ink3);vertical-align:middle;}
+
+.footer{border-top:1px solid var(--rule);padding:1.5rem 3rem;font-size:11px;color:var(--ink3);display:flex;justify-content:space-between;max-width:960px;margin:0 auto;}
+@media(max-width:600px){.header,.main,.footer{padding-left:1.25rem;padding-right:1.25rem;}nav,.month-selector{padding-left:1rem;padding-right:1rem;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">薪資儀表板　·　供營運長參閱</div>
+  <div class="header-title" id="hdr-title">2026年5月　薪資總覽</div>
+  <div class="header-sub" id="hdr-sub">營運部門　9人</div>
+  <div class="header-kpis">
+    <div class="header-kpi"><strong id="hdr-gross">—</strong>本月應發合計<div class="diff" id="hdr-gross-diff"></div></div>
+    <div class="header-kpi"><strong id="hdr-net">—</strong>本月實發合計<div class="diff" id="hdr-net-diff"></div></div>
+    <div class="header-kpi"><strong id="hdr-ot">—</strong>本月加班費<div class="diff" id="hdr-ot-diff"></div></div>
+  </div>
+</div>
+
+<div class="month-selector">
+  <button class="month-btn" onclick="setMonth('01',this)">1月</button>
+  <button class="month-btn" onclick="setMonth('02',this)">2月</button>
+  <button class="month-btn" onclick="setMonth('03',this)">3月</button>
+  <button class="month-btn" onclick="setMonth('04',this)">4月</button>
+  <button class="month-btn active" onclick="setMonth('05',this)">5月</button>
+</div>
+
+<nav>
+  <button class="nav-btn active" onclick="showSection('overview',this)">薪資總覽</button>
+  <button class="nav-btn" onclick="showSection('staff',this)">人員薪資明細</button>
+  <button class="nav-btn" onclick="showSection('cost',this)">人力成本總覽</button>
+</nav>
+
+<div class="main">
+
+  <div class="section active" id="sec-overview">
+    <div class="chart-header">
+      <span class="chart-label">應發結構與實發合計　月度走勢（2026年1–5月）</span>
+      <div class="chart-legend">
+        <span><span class="ld" style="background:#6a9e8a"></span>固定薪資</span>
+        <span><span class="ld" style="background:#c8803c"></span>加班費</span>
+        <span><span class="ld" style="background:#8a6aae"></span>不休假代金</span>
+        <span><span class="ld" style="background:#2d4a2d;border-radius:50%"></span>實發合計</span>
+      </div>
+    </div>
+    <div class="chart-wrap"><canvas id="trend-chart" role="img" aria-label="1至5月應發結構與實發走勢">月度薪資結構走勢。</canvas></div>
+    <div class="analysis-header">逐月變化主因分析</div>
+    <div class="change-list" id="change-list"></div>
+  </div>
+
+  <div class="section" id="sec-staff">
+    <div style="font-size:12px;color:var(--ink3);margin-bottom:1rem;" id="staff-note">本月在職人數。</div>
+    <div style="overflow-x:auto;"><table>
+      <thead><tr>
+        <th>姓名</th><th>職稱</th>
+        <th class="r">本薪＋伙食津貼</th><th class="r">職務加給</th><th class="r">加班費</th>
+        <th class="r">應發合計</th><th class="r">勞保</th><th class="r">健保</th><th class="r">勞退自提</th>
+        <th class="r">實發金額</th><th>本月異動</th>
+      </tr></thead>
+      <tbody id="staff-body"></tbody>
+    </table></div>
+  </div>
+
+  <div class="section" id="sec-cost">
+    <div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:12px;font-size:12px;color:var(--ink3);">
+      <span><span class="ld" style="background:#6a9e8a"></span>固定薪資（1000+1001+1100）</span>
+      <span><span class="ld" style="background:#c8803c"></span>加班費（2000+2001）</span>
+      <span><span class="ld" style="background:#8a6aae"></span>不休假代金（2002–2005）</span>
+      <span><span class="ld" style="background:#3d7abf"></span>公司負擔（4000+4000A+4001+4002+4003）</span>
+    </div>
+    <div style="position:relative;width:100%;height:300px;margin-bottom:1.5rem;">
+      <canvas id="cost-chart" role="img" aria-label="1至5月人力成本堆疊長條圖">人力成本月度變化。</canvas>
+    </div>
+    <div style="overflow-x:auto;"><table>
+      <thead><tr>
+        <th>月份</th><th class="r">固定薪資</th><th class="r">加班費</th><th class="r">不休假代金</th><th class="r">公司負擔</th><th class="r">合計</th>
+      </tr></thead>
+      <tbody id="cost-body"></tbody>
+    </table></div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>薪資儀表板　2026年1–5月　·　營運部門</span>
+  <span id="gen-date"></span>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+document.getElementById('gen-date').textContent = '產製：' + new Date().toLocaleDateString('zh-TW');
+
+const fmt = n => '$' + Math.round(Math.abs(n)).toLocaleString();
+const dash = '<span style="color:var(--ink3)">—</span>';
+
+const ALL = {
+  '01': {
+    label:'1月', count:11,
+    gross:509032, net:482868, ot:9363,
+    base:474313, noh:25356, co:74643,
+    people:[
+      {name:'周家緯',title:'營運長',base:65100,allow:7000,ot:0,gross:72100,labor:1053,health:10362,retire:0,net:59684},
+      {name:'楊庭瑄',title:'資深專案專員',base:38500,allow:2500,ot:1772,gross:42772,labor:860,health:1598,retire:2064,net:38249},
+      {name:'楊凱雯',title:'專案企劃',base:24667,allow:0,ot:0,gross:24667,labor:616,health:554,retire:0,net:23497},
+      {name:'王柏元',title:'資深專案經理',base:48000,allow:5500,ot:0,gross:53500,labor:1145,health:822,retire:0,net:51533},
+      {name:'邱嘉緣',title:'企劃長',base:62300,allow:5000,ot:0,gross:67300,labor:1237,health:3108,retire:0,net:62955},
+      {name:'邱宴藜',title:'企劃經理',base:45500,allow:6000,ot:0,gross:51500,labor:955,health:592,retire:0,net:49953},
+      {name:'郭采柔',title:'專案企劃',base:41000,allow:0,ot:0,gross:41000,labor:955,health:592,retire:0,net:39453},
+      {name:'陳瑜君',title:'專案專員',base:36000,allow:0,ot:0,gross:36000,labor:860,health:592,retire:0,net:34548},
+      {name:'魏育仁',title:'專案經理',base:48000,allow:5500,ot:9363,gross:62863,labor:1145,health:822,retire:0,net:60896},
+      {name:'林玟秀',title:'專案企劃',base:43000,allow:0,ot:0,gross:43000,labor:955,health:592,retire:0,net:41453},
+      {name:'陳盈萱',title:'行政專員',base:14167,allow:0,ot:0,gross:14167,labor:354,health:249,retire:0,net:13564},
+    ],
+    changes:{
+      '周家緯':[{tag:'noh',text:'不休假代金（特休）$25,356'}],
+      '魏育仁':[{tag:'ot',text:'加班費 $9,363'}],
+      '楊凱雯':[{tag:'hc',text:'一月中到職，本月為到職首月（半月薪）'}],
+    }
+  },
+  '02': {
+    label:'2月', count:11,
+    gross:508151, net:481620, ot:2139,
+    base:487646, noh:18366, co:76835,
+    people:[
+      {name:'周家緯',title:'營運長',base:65100,allow:7000,ot:0,gross:72100,labor:1053,health:10362,retire:0,net:60685},
+      {name:'楊庭瑄',title:'資深專案專員',base:38500,allow:2500,ot:0,gross:41000,labor:860,health:1598,retire:2064,net:36478},
+      {name:'楊凱雯',title:'專案企劃',base:40000,allow:0,ot:0,gross:40000,labor:860,health:592,retire:0,net:38548},
+      {name:'王柏元',title:'資深專案經理',base:48000,allow:5500,ot:0,gross:68369,labor:1145,health:822,retire:0,net:66402},
+      {name:'邱嘉緣',title:'企劃長',base:62300,allow:5000,ot:0,gross:67300,labor:1237,health:3108,retire:0,net:62955},
+      {name:'邱宴藜',title:'企劃經理',base:45500,allow:6000,ot:1229,gross:52729,labor:955,health:592,retire:0,net:51182},
+      {name:'郭采柔',title:'專案企劃',base:41000,allow:0,ot:572,gross:41572,labor:955,health:592,retire:0,net:40025},
+      {name:'陳瑜君',title:'專案專員',base:36000,allow:0,ot:0,gross:39497,labor:860,health:592,retire:0,net:38045},
+      {name:'魏育仁',title:'專案經理',base:48000,allow:5500,ot:1567,gross:55067,labor:1145,health:822,retire:0,net:53100},
+      {name:'林玟秀',title:'專案企劃',base:43000,allow:0,ot:0,gross:43000,labor:955,health:592,retire:0,net:41453},
+      {name:'陳盈萱',title:'行政專員',base:28667,allow:0,ot:0,gross:28667,labor:716,health:503,retire:0,net:27448},
+    ],
+    changes:{
+      '王柏元':[{tag:'noh',text:'不休假代金（特休）$14,869'}],
+      '陳瑜君':[{tag:'noh',text:'不休假代金（特休）$3,497'}],
+      '楊凱雯':[{tag:'adj',text:'首個完整月（一月中到職）'}],
+      '魏育仁':[{tag:'ot',text:'加班費 $1,567（較一月減少）'}],
+    }
+  },
+  '03': {
+    label:'3月', count:12,
+    gross:455535, net:415771, ot:2769,
+    base:452766, noh:0, co:71130,
+    people:[
+      {name:'周家緯',title:'營運長',base:65100,allow:7000,ot:0,gross:72100,labor:1053,health:17580,retire:0,net:53467},
+      {name:'楊庭瑄',title:'資深專案專員',base:38500,allow:2500,ot:600,gross:41600,labor:860,health:1598,retire:2064,net:37078},
+      {name:'楊凱雯',title:'專案企劃',base:20417,allow:0,ot:0,gross:20417,labor:510,health:362,retire:0,net:19545},
+      {name:'邱嘉緣',title:'企劃長',base:62300,allow:5000,ot:0,gross:67300,labor:1053,health:3108,retire:0,net:63139},
+      {name:'邱宴藜',title:'企劃經理',base:45500,allow:6000,ot:1229,gross:52729,labor:1050,health:651,retire:0,net:51028},
+      {name:'郭采柔',title:'專案企劃',base:41000,allow:0,ot:343,gross:41343,labor:1050,health:651,retire:0,net:39642},
+      {name:'魏育仁',title:'專案經理',base:48000,allow:5500,ot:597,gross:54097,labor:1145,health:822,retire:0,net:52130},
+      {name:'林玟秀',title:'專案企劃',base:43000,allow:0,ot:0,gross:43000,labor:1050,health:651,retire:0,net:41299},
+      {name:'連真',title:'設計總監',base:31150,allow:0,ot:0,gross:31150,labor:449,health:493,retire:0,net:30208},
+      {name:'蔡宛玲',title:'專案專員',base:13500,allow:0,ot:0,gross:13500,labor:338,health:248,retire:0,net:12914},
+      {name:'薛子儀',title:'視覺設計師',base:21133,allow:0,ot:0,gross:21133,labor:528,health:381,retire:0,net:20224},
+      {name:'陳盈萱',title:'行政專員',base:7167,allow:0,ot:0,gross:7167,labor:179,health:127,retire:0,net:6861},
+    ],
+    changes:{
+      '王柏元':[{tag:'hc',text:'二月底離職'}],
+      '陳瑜君':[{tag:'hc',text:'二月底離職'}],
+      '楊凱雯':[{tag:'hc',text:'最後工作日 3/15，本月為半月薪'}],
+      '陳盈萱':[{tag:'hc',text:'三月底離職（試用期）'}],
+      '蔡宛玲':[{tag:'hc',text:'3/23 到職，本月為到職首月（半月）'}],
+      '薛子儀':[{tag:'hc',text:'3/16 到職，本月為到職首月（半月）'}],
+      '連真':[{tag:'hc',text:'三月加入'}],
+      '周家緯':[{tag:'adj',text:'健保差額 +$7,218（投保級距調整）'}],
+    }
+  },
+  '04': {
+    label:'4月', count:10,
+    gross:486796, net:452375, ot:9873,
+    base:475550, noh:1373, co:72827,
+    people:[
+      {name:'連真',title:'設計總監',base:31150,allow:0,ot:0,gross:31150,labor:449,health:43,retire:0,net:30658},
+      {name:'周家緯',title:'營運長',base:65100,allow:7000,ot:0,gross:72100,labor:1053,health:11292,retire:0,net:59755},
+      {name:'魏育仁',title:'專案經理',base:48000,allow:5500,ot:2537,gross:56037,labor:1145,health:822,retire:0,net:54070},
+      {name:'邱嘉緣',title:'企劃長',base:62300,allow:5000,ot:0,gross:67300,labor:1053,health:3249,retire:0,net:63998},
+      {name:'楊庭瑄',title:'資深專案專員',base:38500,allow:2500,ot:1772,gross:42772,labor:1050,health:1953,retire:2292,net:37477},
+      {name:'林玟秀',title:'專案企劃',base:43000,allow:0,ot:1853,gross:44853,labor:1098,health:785,retire:0,net:42970},
+      {name:'邱宴藜',title:'企劃經理',base:45500,allow:6000,ot:2584,gross:54084,labor:1145,health:785,retire:0,net:52154},
+      {name:'郭采柔',title:'專案企劃',base:41000,allow:0,ot:2087,gross:43087,labor:1050,health:651,retire:0,net:41386},
+      {name:'薛子儀',title:'視覺設計師',base:37000,allow:0,ot:413,gross:37413,labor:955,health:592,retire:0,net:35866},
+      {name:'蔡宛玲',title:'專案專員',base:38000,allow:0,ot:0,gross:38000,labor:955,health:1776,retire:0,net:35269},
+    ],
+    changes:{
+      '楊凱雯':[{tag:'hc',text:'三月底離職'}],
+      '陳盈萱':[{tag:'hc',text:'三月底離職'}],
+      '薛子儀':[{tag:'adj',text:'四月為首個完整月（三月 3/16 到職）'}],
+      '蔡宛玲':[{tag:'adj',text:'四月為首個完整月（三月 3/23 到職）'}],
+      '林玟秀':[{tag:'adj',text:'勞保差額 +$48 · 健保差額 +$134 · 不休假代金 $1,373'}],
+      '楊庭瑄':[{tag:'adj',text:'勞保差額 +$95 · 勞退差額 +$228 · 健保差額 +$177'}],
+      '連真':[{tag:'adj',text:'勞保差額 -$346 · 健保差額 -$450'}],
+      '邱嘉緣':[{tag:'adj',text:'勞保差額 -$92 · 健保差額 +$141'}],
+      '邱宴藜':[{tag:'adj',text:'勞保差額 +$95 · 健保差額 +$134'}],
+      '周家緯':[{tag:'adj',text:'健保差額 +$465（投保級距調整）'}],
+    }
+  },
+  '05': {
+    label:'5月', count:9,
+    gross:437391, net:403378, ot:3701,
+    base:433690, noh:0, co:66715,
+    people:[
+      {name:'連真',title:'設計總監',base:31150,allow:0,ot:0,gross:31150,labor:731,health:493,retire:0,net:29926},
+      {name:'周家緯',title:'營運長',base:65100,allow:7000,ot:0,gross:72100,labor:1053,health:11757,retire:0,net:59290},
+      {name:'魏育仁',title:'專案經理',base:48000,allow:5500,ot:1792,gross:55292,labor:1145,health:822,retire:0,net:53325},
+      {name:'邱嘉緣',title:'企劃長',base:62300,allow:5000,ot:0,gross:67300,labor:1053,health:3390,retire:0,net:62857},
+      {name:'楊庭瑄',title:'資深專案專員',base:38500,allow:2500,ot:0,gross:41000,labor:1145,health:2130,retire:2520,net:35205},
+      {name:'邱宴藜',title:'企劃經理',base:45500,allow:6000,ot:0,gross:51500,labor:1240,health:919,retire:0,net:49341},
+      {name:'郭采柔',title:'專案企劃',base:42140,allow:0,ot:852,gross:42992,labor:1050,health:651,retire:0,net:41291},
+      {name:'薛子儀',title:'視覺設計師',base:37000,allow:0,ot:1057,gross:38057,labor:955,health:592,retire:0,net:36510},
+      {name:'蔡宛玲',title:'專案專員',base:38000,allow:0,ot:0,gross:38000,labor:955,health:1184,retire:0,net:35861},
+    ],
+    changes:{
+      '林玟秀':[{tag:'hc',text:'4/30 離職，五月不計入'}],
+      '郭采柔':[{tag:'adj',text:'本薪調整 $38,000→$39,140'},{tag:'ot',text:'加班費 $852'}],
+      '魏育仁':[{tag:'ot',text:'加班費 $1,792'}],
+      '薛子儀':[{tag:'ot',text:'加班費 $1,057'}],
+      '連真':[{tag:'adj',text:'勞保差額 -$64（投保級距調整）'}],
+      '周家緯':[{tag:'adj',text:'健保差額 +$465（投保級距調整）'}],
+      '邱嘉緣':[{tag:'adj',text:'勞保差額 -$92 · 健保差額 +$141（投保級距調整）'}],
+      '楊庭瑄':[{tag:'adj',text:'勞保差額 +$95 · 健保差額 +$177 · 勞退差額 +$228（投保級距調整）'}],
+      '邱宴藜':[{tag:'adj',text:'勞保差額 +$95 · 健保差額 +$134（投保級距調整）'}],
+    }
+  },
+};
+
+const MONTHLY = {
+  base:  [474313,487646,452766,475550,433690],
+  ot:    [9363,  2139,  2769,  9873,  3701],
+  noh:   [25356, 18366, 0,     1373,  0],
+  net:   [482868,481620,415771,452375,403378],
+  co:    [74643, 76835, 71130, 72827, 66715],
+};
+const LABELS = ['1月','2月','3月','4月','5月'];
+const KEYS   = ['01','02','03','04','05'];
+
+const TS = {
+  hc:  {bg:'#eef2fb',c:'#2a4a8a',l:'人事'},
+  ot:  {bg:'#fdf3e8',c:'#7a4010',l:'加班'},
+  noh: {bg:'#f5eefb',c:'#5a2a7a',l:'不休假'},
+  adj: {bg:'#eaf0ea',c:'#2d4a2d',l:'調整'},
+};
+
+const ANALYSIS = {
+  '02': {from:'1月',to:'2月',delta:-1248,cls:'du',factors:[
+    {tag:'noh',text:'周家緯不休假代金（特休）$25,356，本月無，應發減少 $25,356'},
+    {tag:'ot', text:'魏育仁加班費 $9,363→$1,567，減少 $7,796'},
+    {tag:'noh',text:'王柏元不休假代金（特休）$14,869，應發增加 $14,869'},
+    {tag:'hc', text:'楊凱雯一月中到職，本月首個完整月，實發增加 $12,966'},
+  ]},
+  '03': {from:'2月',to:'3月',delta:-65849,cls:'du',factors:[
+    {tag:'hc', text:'王柏元、陳瑜君二月底離職，合計減少約 $67,000'},
+    {tag:'hc', text:'薛子儀（3/16）、蔡宛玲（3/23）到職，三月半月計入，合計約 $29,000'},
+    {tag:'hc', text:'楊凱雯最後工作日 3/15，三月半月薪，實發減少 $19,877'},
+    {tag:'adj',text:'周家緯健保差額 +$7,218（投保級距調整），扣款增加導致實發減少'},
+  ]},
+  '04': {from:'3月',to:'4月',delta:36604,cls:'dd',factors:[
+    {tag:'hc', text:'薛子儀、蔡宛玲三月半月，四月首個完整月，合計增加約 $42,000'},
+    {tag:'hc', text:'楊凱雯、陳盈萱三月底離職，四月不計入'},
+    {tag:'ot', text:'整體加班費增加 $7,104'},
+    {tag:'adj',text:'各人投保差額補退（楊庭瑄、邱宴藜等）反映在實發'},
+  ]},
+  '05': {from:'4月',to:'5月',delta:-48997,cls:'du',factors:[
+    {tag:'hc', text:'林玟秀 4/30 離職，五月不計入，減少約 $42,970'},
+    {tag:'ot', text:'整體加班費減少 $6,172'},
+    {tag:'adj',text:'郭采柔本薪由 $38,000 調升為 $39,140，實發微增'},
+  ]},
+};
+
+let currentMonth = '05';
+let trendChart = null;
+let costChart = null;
+
+function initCharts() {
+  trendChart = new Chart(document.getElementById('trend-chart'), {
+    type:'bar',
+    data:{
+      labels: LABELS,
+      datasets:[
+        {type:'bar',label:'固定薪資',data:MONTHLY.base,backgroundColor:'#6a9e8a',stack:'g',order:2},
+        {type:'bar',label:'加班費',data:MONTHLY.ot,backgroundColor:'#c8803c',stack:'g',order:2},
+        {type:'bar',label:'不休假代金',data:MONTHLY.noh,backgroundColor:'#8a6aae',stack:'g',order:2},
+        {type:'line',label:'實發合計',data:MONTHLY.net,borderColor:'#2d4a2d',backgroundColor:'transparent',borderWidth:2.5,pointBackgroundColor:'#2d4a2d',pointRadius:5,pointHoverRadius:7,fill:false,tension:0.25,order:1},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:ctx=>ctx.dataset.label+': $'+Number(ctx.raw).toLocaleString()}}},
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{font:{size:12},color: ctx => ctx.tick.label === ALL[currentMonth].label ? '#2d4a2d' : '#909098'}},
+        y:{stacked:true,grid:{color:'rgba(128,128,128,0.1)'},ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'k',font:{size:11}},min:0,max:560000}
+      }
+    }
+  });
+
+  costChart = new Chart(document.getElementById('cost-chart'), {
+    type:'bar',
+    data:{
+      labels: LABELS,
+      datasets:[
+        {label:'固定薪資',data:MONTHLY.base,backgroundColor:'#6a9e8a',stack:'s',order:1},
+        {label:'加班費',data:MONTHLY.ot,backgroundColor:'#c8803c',stack:'s',order:1},
+        {label:'不休假代金',data:MONTHLY.noh,backgroundColor:'#8a6aae',stack:'s',order:1},
+        {label:'公司負擔',data:MONTHLY.co,backgroundColor:'#3d7abf',stack:'s',order:1},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:ctx=>ctx.dataset.label+': $'+Number(ctx.raw).toLocaleString()}}},
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{font:{size:12}}},
+        y:{stacked:true,grid:{color:'rgba(128,128,128,0.1)'},ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'k',font:{size:11}},min:0,max:800000}
+      }
+    }
+  });
+
+  const cb = document.getElementById('cost-body');
+  KEYS.forEach((k,i)=>{
+    const bv=MONTHLY.base[i],ov=MONTHLY.ot[i],nv=MONTHLY.noh[i],cv=MONTHLY.co[i];
+    const tot=bv+ov+nv+cv;
+    const tr=document.createElement('tr');
+    const c=s=>'<td class="r">'+s+'</td>';
+    const cl=s=>'<td style="padding:8px;border-bottom:0.5px solid var(--rule);font-size:12px;font-weight:500;">'+s+'</td>';
+    tr.innerHTML=cl(LABELS[i])+c(fmt(bv))+c(ov?fmt(ov):dash)+c(nv?fmt(nv):dash)+c(fmt(cv))+c('<strong>'+fmt(tot)+'</strong>');
+    cb.appendChild(tr);
+  });
+}
+
+function setMonth(m, btn) {
+  currentMonth = m;
+  document.querySelectorAll('.month-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMonth(m);
+}
+
+function renderMonth(m) {
+  const d = ALL[m];
+  const idx = KEYS.indexOf(m);
+  const prevM = idx > 0 ? KEYS[idx-1] : null;
+  const prevD = prevM ? ALL[prevM] : null;
+
+  document.getElementById('hdr-title').textContent = '2026年'+d.label+'　薪資總覽';
+  document.getElementById('hdr-sub').textContent = '營運部門　'+d.count+'人';
+  document.getElementById('hdr-gross').textContent = fmt(d.gross);
+  document.getElementById('hdr-net').textContent = fmt(d.net);
+  document.getElementById('hdr-ot').textContent = fmt(d.ot);
+
+  if (prevD) {
+    const gd = d.gross - prevD.gross;
+    const nd = d.net - prevD.net;
+    const od = d.ot - prevD.ot;
+    document.getElementById('hdr-gross-diff').textContent = '較上月 ' + (gd>=0?'▲ ':'▼ ') + fmt(gd);
+    document.getElementById('hdr-net-diff').textContent   = '較上月 ' + (nd>=0?'▲ ':'▼ ') + fmt(nd);
+    document.getElementById('hdr-ot-diff').textContent    = '較上月 ' + (od>=0?'▲ ':'▼ ') + fmt(od);
+  } else {
+    ['hdr-gross-diff','hdr-net-diff','hdr-ot-diff'].forEach(id=>document.getElementById(id).textContent='');
+  }
+
+  document.getElementById('staff-note').textContent = '2026年'+d.label+'　在職'+d.count+'人。';
+
+  const sb = document.getElementById('staff-body');
+  sb.innerHTML = '';
+  d.people.forEach(p => {
+    const items = d.changes[p.name] || [];
+    const ch = items.length===0
+      ? '<span style="color:var(--ink3);font-size:12px">—</span>'
+      : items.map(c=>'<span style="display:inline-block;font-size:10px;padding:1px 6px;border-radius:3px;background:'+TS[c.tag].bg+';color:'+TS[c.tag].c+';font-weight:500;margin-right:4px;">'+TS[c.tag].l+'</span><span style="font-size:12px;color:var(--ink2)">'+c.text+'</span>').join('<br>');
+    const cR=(s,col)=>'<td style="padding:8px;border-bottom:0.5px solid var(--rule);text-align:right;font-size:12px;color:'+(col||'var(--ink)')+'">'+s+'</td>';
+    const cL=(s,ex)=>'<td style="padding:8px;border-bottom:0.5px solid var(--rule);font-size:12px;color:var(--ink);'+(ex||'')+'">'+s+'</td>';
+    const tr = document.createElement('tr');
+    tr.innerHTML=
+      cL('<span style="font-weight:500">'+p.name+'</span>')+
+      cL('<span style="color:var(--ink3)">'+p.title+'</span>')+
+      cR(fmt(p.base))+cR(p.allow?fmt(p.allow):dash)+cR(p.ot?fmt(p.ot):dash)+
+      cR('<strong>'+fmt(p.gross)+'</strong>')+
+      cR('-'+fmt(p.labor),'var(--up)')+cR('-'+fmt(p.health),'var(--up)')+
+      cR(p.retire?'-'+fmt(p.retire):dash,'var(--up)')+
+      cR(fmt(p.net),'var(--down)')+
+      cL(ch,'vertical-align:top;line-height:1.8;min-width:200px;');
+    sb.appendChild(tr);
+  });
+
+  const cl = document.getElementById('change-list');
+  cl.innerHTML = '';
+  ['02','03','04','05'].forEach(cm => {
+    const a = ANALYSIS[cm];
+    if (!a) return;
+    const isCurrentOrPast = KEYS.indexOf(cm) <= KEYS.indexOf(m);
+    const item = document.createElement('div');
+    item.className = 'change-item';
+    item.style.opacity = isCurrentOrPast ? '1' : '0.35';
+    item.innerHTML = '<div class="change-month">'
+      +'<span class="m-from">'+a.from+'</span>'
+      +'<span style="font-size:16px;color:var(--ink3);line-height:1">↓</span>'
+      +'<span class="m-to">'+a.to+'</span>'
+      +'<span class="m-delta '+a.cls+'">'+(a.delta>=0?'▲':'▼')+' '+fmt(a.delta)+'</span>'
+      +'</div>'
+      +'<div class="change-factors">'
+      +a.factors.map(f=>'<div class="factor"><span class="factor-tag tag-'+f.tag+'">'+{hc:'人事',ot:'加班',noh:'不休假',adj:'調整'}[f.tag]+'</span>'+f.text+'</div>').join('')
+      +'</div>';
+    cl.appendChild(item);
+  });
+}
+
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+initCharts();
+renderMonth('05');
+</script>
+</body>
+</html>
